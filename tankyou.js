@@ -8,12 +8,14 @@ const url = require('url');
 const request = require('request');
 //var rp = require('request-promise')
 const async = require('async');
-const port = 8080;
+const port = process.env.PORT || 8080;
 const apikey = "f5581dae-81e9-31ed-f84b-79c11b69d9f6";
 const apiurl = "https://creativecommons.tankerkoenig.de/json/list.php?apikey=" + apikey;
 const gMapsAPI = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
 //TODO generate your own fucking api key you moron
 const gMapsAPIKey = "AIzaSyAPtu3Ohy8UoBaZJbmYiHq5SucMox-lYZk";
+
+
 
 
 http.createServer(async function (req, res) {
