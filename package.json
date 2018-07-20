@@ -1,7 +1,7 @@
 {
-  "name": "node-example",
-  "version": "1.0.0",
-  "description": "This example is so cool.",
+  "name": "maps-4-facts",
+  "version": "1.1.0",
+  "description": "Yesssss",
   "main": "thankyou.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,6 +10,6 @@
     "example",
     "heroku"
   ],
-  "author": "jane-doe",
+  "author": "tinf17b",
   "license": "MIT"
 }
