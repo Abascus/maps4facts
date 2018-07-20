@@ -1,15 +1,24 @@
 {
   "name": "maps-4-facts",
-  "version": "1.1.0",
-  "description": "Yesssss",
-  "main": "thankyou.js",
-  "scripts": {
-    "start": "node thankyou.js"
+  "version": "1.2.0",
+  "description": "Lol",
+  "main": "tankyou.js",
+  "dependencies": {
+    "async": "^2.6.1",
+    "request": "^2.87.0"
   },
-  "keywords": [
-    "example",
-    "heroku"
-  ],
-  "author": "tinf17b",
-  "license": "MIT"
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abascus/maps4facts.git"
+  },
+  "author": "tinf",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Abascus/maps4facts/issues"
+  },
+  "homepage": "https://github.com/Abascus/maps4facts#readme"
 }
