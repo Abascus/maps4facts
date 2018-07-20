@@ -9,11 +9,10 @@ const request = require('request');
 //var rp = require('request-promise')
 const async = require('async');
 const port = process.env.PORT || 8080;
-const apikey = "f5581dae-81e9-31ed-f84b-79c11b69d9f6";
+const apikey = process.env.TK_API;
 const apiurl = "https://creativecommons.tankerkoenig.de/json/list.php?apikey=" + apikey;
 const gMapsAPI = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
-//TODO generate your own fucking api key you moron
-const gMapsAPIKey = "AIzaSyAPtu3Ohy8UoBaZJbmYiHq5SucMox-lYZk";
+const gMapsAPIKey = process.env.GMAPS;
 
 
 
@@ -117,7 +116,7 @@ async function formData(lat, lng, radius, fuel) {
     //rating = JSON.parse(res[0]);
     //console.log(rating);
     var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n";
-    xml += "<!DOCTYPE tankstellen SYSTEM \"https://pastebin.com/raw/JkfFPS3M\">\n";
+    xml += "<!DOCTYPE tankstellen SYSTEM \"https://pastebin.com/raw/nSL321xF\">\n";
     xml += "<tankstellen>\n";
     for (let i = 0; i < json.stations.length; i++) {
         xml += "<tankstelle>\n";
