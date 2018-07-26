@@ -59,7 +59,7 @@ http.createServer(async function (req, res) {
                 res.writeHead(200, {'Content-Type': 'text/plain'});
             } else {
                 xml = await
-                    formData(bodyjson.lat, bodyjson.lng, bodyjson.radius, bodyjson.fuel);
+                    formData(bodyjson.lat, bodyjson.lng, bodyjson.radius, bodyjson.fuel, bodyjson.isEdge);
                 res.writeHead(200, {'Content-Type': 'application/xml'});//text/plan .. application/xml
             }
             res.end(xml);
@@ -108,7 +108,7 @@ async function retrieveURL(adr) {
     });
 }
 
-async function formData(lat, lng, radius, fuel) {
+async function formData(lat, lng, radius, fuel, isEdge) {
     console.log("formData: start"+"lat "+lat+",lng "+lng+",radius "+radius+",fuel "+fuel);
     let json = await getData(lat, lng, radius, fuel); //TODO variable fuel type
     let ratings = await augmentWithRatings(json);
@@ -116,7 +116,9 @@ async function formData(lat, lng, radius, fuel) {
     //rating = JSON.parse(res[0]);
     //console.log(rating);
     var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n";
-    xml += "<!DOCTYPE tankstellen SYSTEM \""+ process.env.DTD_URL +"\">\n";
+    if(!isEdge) {
+        xml += "<!DOCTYPE tankstellen SYSTEM \"" + process.env.DTD_URL + "\">\n";
+    }
     xml += "<tankstellen>\n";
     for (let i = 0; i < json.stations.length; i++) {
         xml += "<tankstelle>\n";
