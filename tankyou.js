@@ -42,21 +42,21 @@ http.createServer(async function (req, res) {
             let bodyjson = JSON.parse(Buffer.concat(body).toString());
             if (bodyIsUndefined(bodyjson)) {
                 xml = "One or more parameters are not set";
-                res.writeHead(200, {'Content-Type': 'text/plain'});
+                res.writeHead(400, {'Content-Type': 'text/plain'});
             } else if (isNaN(bodyjson.lat) || isNaN(bodyjson.lng) || isNaN(bodyjson.radius)) {
                 xml = "Lat, Lng and Radius have to be numbers";
-                res.writeHead(200, {'Content-Type': 'text/plain'});
+                res.writeHead(400, {'Content-Type': 'text/plain'});
             } else if (fuelarray.indexOf(bodyjson.fuel) < 0) {
                 xml = "Please select a valid fuel";
-                res.writeHead(200, {'Content-Type': 'text/plain'});
+                res.writeHead(400, {'Content-Type': 'text/plain'});
             } else if ((bodyjson.lat < 47.40734 || bodyjson.lat > 54.9079) || (bodyjson.lng < 5.98815 || bodyjson.lng > 14.98853)) {
                 //Lat-long coorditates for cities in Germany are in range: Latitude from 47.40724 to 54.9079 and longitude from 5.98815 to 14.98853.
                 //xml = "Lat must be between -90 and 90 and Lng must be between -180 and 180";
                 xml = "Lat and Lng have to be in Germania";
-                res.writeHead(200, {'Content-Type': 'text/plain'});
+                res.writeHead(400, {'Content-Type': 'text/plain'});
             } else if (bodyjson.radius < 1) {
                 xml = "Radius must be bigger than 1";
-                res.writeHead(200, {'Content-Type': 'text/plain'});
+                res.writeHead(400, {'Content-Type': 'text/plain'});
             } else {
                 xml = await
                     formData(bodyjson.lat, bodyjson.lng, bodyjson.radius, bodyjson.fuel, bodyjson.isEdge);
