@@ -1,20 +1,13 @@
-//einzelne tankstelle https://creativecommons.tankerkoenig.de/json/detail.php?id=005056ba-7cb6-1ed2-bceb-90e59ad2cd35&apikey=f5581dae-81e9-31ed-f84b-79c11b69d9f6
-//umkreissuche https://creativecommons.tankerkoenig.de/json/list.php?lat=52.52099975265203&lng=13.43803882598877&rad=4&sort=price&type=diesel&apikey=f5581dae-81e9-31ed-f84b-79c11b69d9f6
-
-
 const http = require('http');
 const https = require('https');
 const url = require('url');
 const request = require('request');
-//var rp = require('request-promise')
 const async = require('async');
 const port = process.env.PORT || 8080;
 const apikey = process.env.TK_API || "f5581dae-81e9-31ed-f84b-79c11b69d9f6";
 const apiurl = "https://creativecommons.tankerkoenig.de/json/list.php?apikey=" + apikey;
 const gMapsAPI = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
 const gMapsAPIKey = process.env.GMAPS || "";
-
-
 
 
 http.createServer(async function (req, res) {
@@ -38,36 +31,35 @@ http.createServer(async function (req, res) {
             body.push(chunk);
         }).on('end', async () => {
             let fuelarray = ["e10", "e5", "diesel"];
-            let xml = "error";
+            let response = "";
             let bodyjson = JSON.parse(Buffer.concat(body).toString());
             if (bodyIsUndefined(bodyjson)) {
-                xml = "One or more parameters are not set";
+                response = "Einer oder mehrere Parameter sind nicht gesetzt";
                 res.writeHead(400, {'Content-Type': 'text/plain'});
             } else if (isNaN(bodyjson.lat) || isNaN(bodyjson.lng) || isNaN(bodyjson.radius)) {
-                xml = "Lat, Lng and Radius have to be numbers";
+                response = "Latitude, Longitude und Radius müssen Zahlen sein!";
                 res.writeHead(400, {'Content-Type': 'text/plain'});
             } else if (fuelarray.indexOf(bodyjson.fuel) < 0) {
-                xml = "Please select a valid fuel";
+                response = "Benzinart ist nicht valide!";
                 res.writeHead(400, {'Content-Type': 'text/plain'});
             } else if ((bodyjson.lat < 47.40734 || bodyjson.lat > 54.9079) || (bodyjson.lng < 5.98815 || bodyjson.lng > 14.98853)) {
                 //Lat-long coorditates for cities in Germany are in range: Latitude from 47.40724 to 54.9079 and longitude from 5.98815 to 14.98853.
-                //xml = "Lat must be between -90 and 90 and Lng must be between -180 and 180";
-                xml = "Lat and Lng have to be in Germania";
+                response = "Latitude und Longitude müssen sich in Deutschland befinden!";
                 res.writeHead(400, {'Content-Type': 'text/plain'});
             } else if (bodyjson.radius < 1) {
-                xml = "Radius must be bigger than 1";
+                response = "Radius muss größer als 1 sein!";
                 res.writeHead(400, {'Content-Type': 'text/plain'});
             } else {
-                xml = await
+                response = await
                     formData(bodyjson.lat, bodyjson.lng, bodyjson.radius, bodyjson.fuel, bodyjson.isEdge);
                 res.writeHead(200, {'Content-Type': 'application/xml'});//text/plan .. application/xml
             }
-            res.end(xml);
+            res.end(response);
             console.log("response succesful");
         });
     }
 }).listen(port);
-console.log("Server started at "+port);
+console.log("Server started at " + port);
 
 function bodyIsUndefined(reqBody) {
     return (typeof reqBody.lat == 'undefined' ||
@@ -86,7 +78,7 @@ function getData(lat, long, radius, fuel) {
     console.log("getData: getting data");
     return new Promise(function (resolve, reject) {
         request(adr, function (error, response, body) {
-            json = JSON.parse(body);
+            let json = JSON.parse(body);
             for (let i = 0; i < json.stations.length; i++) {
                 //TODO search the whole array
                 if (!isNaN(json.stations[i].price) && json.stations[i].price !== null) {
@@ -109,14 +101,11 @@ async function retrieveURL(adr) {
 }
 
 async function formData(lat, lng, radius, fuel, isEdge) {
-    console.log("formData: start"+"lat "+lat+",lng "+lng+",radius "+radius+",fuel "+fuel);
+    console.log("formData: start" + "lat " + lat + ",lng " + lng + ",radius " + radius + ",fuel " + fuel);
     let json = await getData(lat, lng, radius, fuel); //TODO variable fuel type
     let ratings = await augmentWithRatings(json);
-    //let openingHours = await augmentWithOpeningHours(json);
-    //rating = JSON.parse(res[0]);
-    //console.log(rating);
     var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n";
-    if(!isEdge) {
+    if (!isEdge) {
         xml += "<!DOCTYPE tankstellen SYSTEM \"" + process.env.DTD_URL + "\">\n";
     }
     xml += "<tankstellen>\n";
@@ -145,18 +134,12 @@ async function formData(lat, lng, radius, fuel, isEdge) {
 
 
 function augmentWithRatings(data) {
-    //TODOne fixed by morten
-
-    let ratings = [];
     let functions = [];
     console.log("augmentWithRatings: getting ratings");
     for (let i = 0; i < data.stations.length; i++) {
-        //let adr = gMapsAPI + "?location=" + data.stations[i].lat + "," + data.stations[i].lng + "&radius=500&type=gas_station&key=" + gMapsAPIKey;
         functions[i] = async.reflect(function (callback) {
             setTimeout(async function () {
-                //console.log(gMapsAPI + "?location=" + data.stations[i].lat + "," + data.stations[i].lng + "&radius=500&type=gas_station&key=" + gMapsAPIKey);
                 let answer = await retrieveURL(gMapsAPI + "?location=" + data.stations[i].lat + "," + data.stations[i].lng + "&radius=1000&type=gas_station&key=" + gMapsAPIKey);
-                //console.log(answer.length+" number:"+i);
                 callback(null, answer);
             }, 100);
         })
@@ -164,59 +147,17 @@ function augmentWithRatings(data) {
     }
     return new Promise(function (resolve, reject) {
         async.parallel(functions, function (err, results) {
-            // the results array will equal ['one','two'] even though
-            // the second function had a shorter timeout.
-            //console.log(results.length);
-            //console.log(results[0].value);
-            //console.log(data);
             let ratings = [];
             for (let i = 0; i < results.length; i++) {
                 rating = JSON.parse(results[i].value);
-
- /*               if(!(rating.results.length <= 0 ||typeof rating.results[0].opening_hours == 'undefined')) {
-                    console.log(rating.results[0].opening_hours);
-                }*/
                 if (rating.results.length <= 0 || typeof rating.results[0].rating == 'undefined') {
                     ratings[i] = -1;
                 } else {
                     ratings[i] = rating.results[0].rating;
-                    //console.log(addXMLTag("rating",rating.results[0].rating));
                 }
             }
             resolve(ratings);
         });
     });
 }
-
-
-/*function augmentWithOpeningHours(data) {
-    //TODOne fixed by morten
-
-    let ratings = [];
-    let functions = [];
-    for (let i = 0; i < data.stations.length; i++) {
-        functions[i] = async.reflect(function (callback) {
-            setTimeout(async function () {
-                let answer = await retrieveURL("https://creativecommons.tankerkoenig.de/json/detail.php?id="+data.stations[i].id+"&apikey=f5581dae-81e9-31ed-f84b-79c11b69d9f6");
-                //console.log(answer.length+" number:"+i);
-                callback(null, answer);
-            }, 100);
-        })
-
-    }
-    return new Promise(function (resolve, reject) {
-        async.parallel(functions, function (err, results) {
-            // the results array will equal ['one','two'] even though
-            // the second function had a shorter timeout.
-            //console.log(results.length);
-            //console.log(results[0].value);
-            //console.log(data);
-            let openinghours = [];
-            for (let i = 0; i < results.length; i++) {
-                console.log(results[i].value)
-            }
-            resolve(openinghours);
-        });
-    });
-}*/
 
